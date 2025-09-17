@@ -1,45 +1,60 @@
 #!/usr/bin/env python3
 """
-Utility functions for nested map access and JSON fetching.
+utils module
+This module contains utility functions for nested dictionary access,
+HTTP JSON fetching, and memoization.
 """
 
+from typing import Any, Dict, Tuple
 import requests
 
 
-def access_nested_map(nested_map, path):
+def access_nested_map(nested_map: Dict[str, Any], path: Tuple[str, ...]) -> Any:
     """
-    Access a nested dictionary using a sequence of keys.
+    Access a nested dictionary using a tuple of keys.
 
     Args:
-        nested_map (dict): The dictionary to access.
-        path (tuple): A sequence of keys to traverse.
+        nested_map (Dict[str, Any]): The nested dictionary to access.
+        path (Tuple[str, ...]): A tuple representing the sequence of keys.
 
     Returns:
-        The value found at the end of the path.
+        Any: The value found at the specified path.
 
     Raises:
-        KeyError: If any key is missing or if a non-dict is accessed.
+        KeyError: If a key in the path does not exist.
     """
     current = nested_map
     for key in path:
         if not isinstance(current, dict):
-            # If the current value is not a dictionary, raise KeyError
-            raise KeyError(key)
-        current = current[key]  # Raises KeyError automatically if key doesn't exist
+            raise KeyError(f"{key} not found in nested map")
+        current = current[key]  # Raises KeyError if key does not exist
     return current
 
 
-def get_json(url):
+def get_json(url: str) -> Dict[str, Any]:
     """
-    Fetch JSON content from a URL.
+    Fetch JSON data from a given URL.
 
     Args:
-        url (str): The URL to fetch.
+        url (str): The URL to fetch data from.
 
     Returns:
-        dict: The JSON response.
+        Dict[str, Any]: The JSON response.
     """
     response = requests.get(url)
     return response.json()
 
+
+def memoize(method):
+    """
+    Decorator to cache the result of a method or property.
+    """
+    attr_name = "_memoized_" + method.__name__
+
+    def wrapper(self):
+        if not hasattr(self, attr_name):
+            setattr(self, attr_name, method(self))
+        return getattr(self, attr_name)
+
+    return property(wrapper)
 
