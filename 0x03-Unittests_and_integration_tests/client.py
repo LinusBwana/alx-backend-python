@@ -4,12 +4,13 @@ client module
 Contains GithubOrgClient class to interact with GitHub API.
 """
 
+from typing import Dict, Any
 from utils import get_json
 
 
 class GithubOrgClient:
     """
-    GithubOrgClient class
+    GithubOrgClient class to interact with GitHub organizations.
     """
 
     def __init__(self, org_name: str) -> None:
@@ -19,8 +20,15 @@ class GithubOrgClient:
         self._org_name = org_name
 
     @property
-    def org(self):
+    def org(self) -> Dict[str, Any]:
         """
-        Returns the organization data from GitHub.
+        Fetch and return organization data from GitHub.
         """
         return get_json(f"https://api.github.com/orgs/{self._org_name}")
+
+    @property
+    def _public_repos_url(self) -> str:
+        """
+        Return the public repos URL from the organization payload.
+        """
+        return self.org.get("repos_url")

@@ -10,9 +10,7 @@ from client import GithubOrgClient
 
 
 class TestGithubOrgClient(unittest.TestCase):
-    """
-    Test case for the GithubOrgClient class.
-    """
+    """Tests for GithubOrgClient"""
 
     @parameterized.expand([
         ("google", {"org": "google"}),
@@ -33,3 +31,22 @@ class TestGithubOrgClient(unittest.TestCase):
 
         # Ensure returned result matches the mocked payload
         self.assertEqual(result, {"org": "test"})
+
+    def test_public_repos_url(self):
+        """Test _public_repos_url returns correct URL from mocked org property"""
+        fake_payload = {"repos_url": "https://api.github.com/orgs/test/repos"}
+        client = GithubOrgClient("test_org")
+
+        # Patch the `org` property using a context manager
+        with patch.object(GithubOrgClient, "org", new_callable=property) as mock_org:
+            mock_org.return_value = fake_payload
+
+            result = client._public_repos_url
+            expected = fake_payload["repos_url"]
+
+            # Verify the property returns the expected repos URL
+            self.assertEqual(result, expected)
+
+
+if __name__ == "__main__":
+    unittest.main()
