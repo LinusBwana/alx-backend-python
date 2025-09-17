@@ -39,3 +39,9 @@ class GithubOrgClient:
         """
         repos = get_json(self._public_repos_url)
         return [repo["name"] for repo in repos]
+
+    def has_license(self, repo: Dict[str, Any], license_key: str) -> bool:
+        """
+        Return True if the repo has the specified license key.
+        """
+        return repo.get("license", {}).get("key") == license_key
