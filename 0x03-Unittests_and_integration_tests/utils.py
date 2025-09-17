@@ -1,32 +1,45 @@
-#!/usr/bin/python3
+#!/usr/bin/env python3
 """
-utils module
-This module contains utility functions for nested dictionary access.
+Utility functions for nested map access and JSON fetching.
 """
 
-from typing import Mapping, Any, Tuple
+import requests
 
 
-def access_nested_map(nested_map: Mapping, path: Tuple[str, ...]) -> Any:
+def access_nested_map(nested_map, path):
     """
-    Access a nested dictionary using a tuple path.
+    Access a nested dictionary using a sequence of keys.
 
     Args:
-        nested_map (Mapping): A dictionary that may contain other dictionaries.
-        path (Tuple[str, ...]): A tuple representing the keys to access.
+        nested_map (dict): The dictionary to access.
+        path (tuple): A sequence of keys to traverse.
 
     Returns:
-        Any: The value found at the end of the path.
+        The value found at the end of the path.
 
     Raises:
-        KeyError: If a key in the path is not found.
+        KeyError: If any key is missing or if a non-dict is accessed.
     """
     current = nested_map
     for key in path:
         if not isinstance(current, dict):
-            # Raise a KeyError for the current invalid key
+            # If the current value is not a dictionary, raise KeyError
             raise KeyError(key)
-        current = current[key]
+        current = current[key]  # Raises KeyError automatically if key doesn't exist
     return current
+
+
+def get_json(url):
+    """
+    Fetch JSON content from a URL.
+
+    Args:
+        url (str): The URL to fetch.
+
+    Returns:
+        dict: The JSON response.
+    """
+    response = requests.get(url)
+    return response.json()
 
 
