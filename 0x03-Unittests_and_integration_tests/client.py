@@ -3,7 +3,6 @@
 client module
 Contains GithubOrgClient class to interact with GitHub API.
 """
-
 from typing import Dict, Any, List
 from utils import get_json
 
@@ -12,7 +11,6 @@ class GithubOrgClient:
     """
     GithubOrgClient class to interact with GitHub organizations.
     """
-
     def __init__(self, org_name: str) -> None:
         """
         Initialize the client with the organization name.
@@ -33,15 +31,26 @@ class GithubOrgClient:
         """
         return self.org.get("repos_url")
 
-    def public_repos(self) -> List[str]:
+    def public_repos(self, license: str = None) -> List[str]:
         """
         Return a list of public repo names for the organization.
+        Optionally filter by license.
         """
         repos = get_json(self._public_repos_url)
-        return [repo["name"] for repo in repos]
+        if license is None:
+            return [repo["name"] for repo in repos]
+        
+        return [
+            repo["name"] for repo in repos 
+            if self.has_license(repo, license)
+        ]
 
-    def has_license(self, repo: Dict[str, Any], license_key: str) -> bool:
+    @staticmethod
+    def has_license(repo: Dict[str, Any], license_key: str) -> bool:
         """
-        Return True if the repo has the specified license key.
+        Check if a repository has a specific license.
         """
-        return repo.get("license", {}).get("key") == license_key
+        license_info = repo.get("license")
+        if license_info is None:
+            return False
+        return license_info.get("key") == license_key
