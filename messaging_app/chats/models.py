@@ -4,7 +4,7 @@ from django.contrib.auth.hashers import make_password
 from django.contrib.auth.models import AbstractUser
 
 # Create your models here.
-class User(AbstractUser):
+class CustomUser(AbstractUser):
     Role_Choices = [
         ('guest', 'Guest'),
         ('host', 'Host'),
@@ -51,7 +51,7 @@ class Conversation(models.Model):
         editable=False,
         db_index=True
     )
-    participants_id = models.ForeignKey(User, on_delete=models.CASCADE, related_name='conversations')
+    participants_id = models.ForeignKey(CustomUser, on_delete=models.CASCADE, related_name='conversations')
     created_at = models.DateTimeField(auto_now_add=True)
 
     def __str__(self):
@@ -65,7 +65,7 @@ class Message(models.Model):
         editable=False,
         db_index=True
     )
-    sender_id = models.ForeignKey(User, on_delete=models.CASCADE, related_name='sent_messages')
+    sender_id = models.ForeignKey(CustomUser, on_delete=models.CASCADE, related_name='sent_messages')
     conversation_id = models.ForeignKey(Conversation, on_delete=models.CASCADE, related_name='messages')
     message_body = models.TextField(null=False)
     sent_at = models.DateTimeField(auto_now_add=True)

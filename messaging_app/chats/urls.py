@@ -12,11 +12,3 @@ urlpatterns = [
     path('', include(router.urls)),
     path('', include(conversations_router.urls)),
 ]
-
-# router = routers.DefaultRouter()
-# router.register(r'messages',views.MessageViewSet, basename="messages")
-# router.register(r'conversations', views.ConversationViewSet, basename="conversations")
-
-# urlpatterns = [
-#     path('', include(router.urls)),
-# ]

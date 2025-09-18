@@ -1,14 +1,14 @@
 from rest_framework import serializers
-from .models import User, Message, Conversation
+from .models import CustomUser, Message, Conversation
 from django.contrib.auth.password_validation import validate_password
 import re
 
-class UserSerializer(serializers.ModelSerializer):
-    password = serializers.CharField(write_only=True, validators=validate_password)
+class CustomUserSerializer(serializers.ModelSerializer):
+    password = serializers.CharField(write_only=True, validators=[validate_password])
     confirm_password = serializers.CharField(write_only=True)
 
     class Meta:
-        model = User
+        model = CustomUser
         fields = [
             'id', 'username', 'first_name', 'last_name', 
             'email', 'phone_number', 'role', 'created_at',
@@ -21,13 +21,13 @@ class UserSerializer(serializers.ModelSerializer):
         }
 
     def validate_username(self, username):
-        if User.objects.filter(username=username).exists():
+        if CustomUser.objects.filter(username=username).exists():
             raise serializers.ValidationError("A user with this username already exists.")
         return username
 
     def validate_email(self, email):
         """Validate email format and uniqueness"""
-        if User.objects.filter(email=email).exists():
+        if CustomUser.objects.filter(email=email).exists():
             raise serializers.ValidationError("A user with this email already exists.")
         return email
     
@@ -38,7 +38,7 @@ class UserSerializer(serializers.ModelSerializer):
             phone_template = re.compile(r'^\+254\d{9}')
             if not phone_template.match(phone_number):
                 raise serializers.ValidationError("Enter a valid phone number. +254*********")
-            if User.objects.filter(phone_number=phone_number).exists():
+            if CustomUser.objects.filter(phone_number=phone_number).exists():
                 raise serializers.ValidationError("A user with this phone_number already exists.")
         return phone_number
     
@@ -52,7 +52,7 @@ class UserSerializer(serializers.ModelSerializer):
         """Create user with encrypted password"""
         validated_data.pop('confirm_password')
         password = validated_data.pop('password')
-        user = User.objects.create_user(**validated_data)
+        user = CustomUser.objects.create_user(**validated_data)
         user.set_password(password)
         user.save()
         return user
