@@ -1,10 +1,18 @@
-from rest_framework import viewsets, filters, status
-from .serializers import ConversationSerializer, MessageSerializer
+from rest_framework import viewsets, filters, status, mixins
+from .serializers import ConversationSerializer, MessageSerializer, CustomUserSerializer
 from .models import Conversation, Message
 from rest_framework import serializers
+from . models import CustomUser
+from rest_framework.permissions import AllowAny
 
 
 # Create your views here.
+class RegisterViewSet(mixins.CreateModelMixin, viewsets.GenericViewSet):
+    queryset = CustomUser.objects.all()
+    serializer_class = CustomUserSerializer
+    permission_classes = [AllowAny]
+
+
 class ConversationViewSet(viewsets.ModelViewSet):
     queryset = Conversation.objects.all()
     serializer_class = ConversationSerializer
