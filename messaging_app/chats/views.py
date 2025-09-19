@@ -1,6 +1,7 @@
 from rest_framework import viewsets, filters, status
 from .serializers import ConversationSerializer, MessageSerializer
 from .models import Conversation, Message
+from rest_framework import serializers
 
 
 # Create your views here.
@@ -23,3 +24,22 @@ class MessageViewSet(viewsets.ModelViewSet):
     search_fields = ['message_body', 'sender_id__first_name', 'sender_id__last_name']
     ordering_fields = ['sent_at']
     ordering = ['-sent_at'] 
+
+    def get_queryset(self):
+        """Filter messages by conversation when accessed through nested route"""
+        conversation_pk = self.kwargs.get('conversation_pk')
+        if conversation_pk:
+            return Message.objects.filter(conversation_id=conversation_pk)
+        return Message.objects.all()
+
+    def perform_create(self, serializer):
+        """Automatically set the conversation when creating a message through nested route"""
+        conversation_pk = self.kwargs.get('conversation_pk')
+        if conversation_pk:
+            try:
+                conversation = Conversation.objects.get(pk=conversation_pk)
+                serializer.save(conversation=conversation)
+            except Conversation.DoesNotExist:
+                raise serializers.ValidationError("Conversation not found")
+        else:
+            serializer.save()
