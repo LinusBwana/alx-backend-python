@@ -91,7 +91,7 @@ class LoginSerializer(serializers.Serializer):
 
 class MessageSerializer(serializers.ModelSerializer):
     sender_name = serializers.SerializerMethodField()
-    sent_at = serializers.DateTimeField(format="%d %b %Y %H:%M:%S")
+    sent_at = serializers.DateTimeField(format="%d %b %Y %H:%M:%S", read_only=True)
 
     class Meta:
         model = Message
@@ -117,7 +117,7 @@ class MessageSerializer(serializers.ModelSerializer):
 class ConversationSerializer(serializers.ModelSerializer):
     messages = MessageSerializer(many=True, read_only=True)
     participant_name = serializers.SerializerMethodField()
-    created_at = serializers.DateTimeField(format="%d %b %Y %H:%M:%S")
+    created_at = serializers.DateTimeField(format="%d %b %Y %H:%M:%S", read_only=True)
 
     class Meta:
         model = Conversation
@@ -129,6 +129,13 @@ class ConversationSerializer(serializers.ModelSerializer):
 
     def validate_participants_id(self, participants_id):
         """Validate participant exists and is active"""
-        if not participants_id.is_active:
-            raise serializers.ValidationError("Participant account is not active.")
+        if not participants_id:
+            raise serializers.ValidationError("Participants list cannot be empty.")
+
+        for participant in participants_id:
+            if not participant.is_active:
+                raise serializers.ValidationError(
+                    f"Participant {participant.username} account is not active."
+                )
+
         return participants_id
