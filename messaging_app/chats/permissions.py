@@ -13,8 +13,17 @@ class IsParticipantOfConversation(BasePermission):
     def has_object_permission(self, request, view, obj):
         # Step 2: Check if this conversation belongs to this user
         # obj is the conversation we're trying to access
-        if isinstance(obj, Conversation):
+        if not isinstance(obj, Conversation):
+            return False
+        
+        # Everyone can view if they are the participant
+        if request.method in ['GET', 'HEAD', 'OPTIONS']:
             return obj.participants_id == request.user
+        
+        # Only the participant can modify or delete
+        if request.method in ['PUT', 'PATCH', 'DELETE']:
+            return obj.participants_id == request.user
+        
         return False
 
 

@@ -3,7 +3,7 @@ from .serializers import ConversationSerializer, MessageSerializer, CustomUserSe
 from .models import Conversation, Message
 from rest_framework import serializers
 from . models import CustomUser
-from rest_framework.permissions import AllowAny
+from rest_framework.permissions import AllowAny, IsAuthenticated
 from .permissions import IsParticipantOfConversation, CanAccessMessagesInUserConversations, CanOnlyEditOwnMessages
 from .auth import CustomJWTAuthentication
 
