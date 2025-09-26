@@ -4,6 +4,8 @@ from .models import Conversation, Message
 from rest_framework import serializers
 from . models import CustomUser
 from rest_framework.permissions import AllowAny
+from .permissions import IsParticipantOfConversation, CanAccessMessagesInUserConversations, CanOnlyEditOwnMessages
+from .auth import CustomJWTAuthentication
 
 
 # Create your views here.
@@ -16,6 +18,8 @@ class RegisterViewSet(mixins.CreateModelMixin, viewsets.GenericViewSet):
 class ConversationViewSet(viewsets.ModelViewSet):
     queryset = Conversation.objects.all()
     serializer_class = ConversationSerializer
+    permission_classes = [IsParticipantOfConversation]
+    authentication_classes = [CustomJWTAuthentication]
     
     # Enable filtering, searching, and ordering
     filter_backends = [filters.SearchFilter, filters.OrderingFilter]
@@ -26,6 +30,8 @@ class ConversationViewSet(viewsets.ModelViewSet):
 class MessageViewSet(viewsets.ModelViewSet):
     queryset = Message.objects.all()
     serializer_class = MessageSerializer
+    permission_classes = [CanAccessMessagesInUserConversations, CanOnlyEditOwnMessages]
+    authentication_classes = [CustomJWTAuthentication]
 
      # Enable filtering, searching, and ordering
     filter_backends = [filters.SearchFilter, filters.OrderingFilter]
@@ -36,9 +42,10 @@ class MessageViewSet(viewsets.ModelViewSet):
     def get_queryset(self):
         """Filter messages by conversation when accessed through nested route"""
         conversation_pk = self.kwargs.get('conversation_pk')
+        user = self.request.user
         if conversation_pk:
-            return Message.objects.filter(conversation_id=conversation_pk)
-        return Message.objects.all()
+            return Message.objects.filter(conversation_id=conversation_pk, conversation__participants_id=user)
+        return Message.objects.filter(conversation__participants_id=user)
 
     def perform_create(self, serializer):
         """Automatically set the conversation when creating a message through nested route"""

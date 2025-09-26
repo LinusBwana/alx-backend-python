@@ -27,5 +27,4 @@ urlpatterns = [
     path('api/', include('chats.urls')),
     path('', include(router.urls)),
     path('api-auth/', include('rest_framework.urls')),
-    
 ]
