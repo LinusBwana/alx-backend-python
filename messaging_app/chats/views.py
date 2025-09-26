@@ -53,6 +53,10 @@ class ConversationViewSet(viewsets.ModelViewSet):
     ordering_fields = ['created_at']
     ordering = ['-created_at']
 
+    def get_queryset(self):
+        user = self.request.user
+        return Conversation.objects.filter(participants_id=user).distinct()
+
 class MessageViewSet(viewsets.ModelViewSet):
     queryset = Message.objects.all()
     serializer_class = MessageSerializer
