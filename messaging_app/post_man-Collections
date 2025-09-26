@@ -1,0 +1,196 @@
+{
+    "info": {
+        "name": "Conversations API",
+        "schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json",
+        "description": "Collection for testing Conversations API with JWT Authentication"
+    },
+    "item": [
+        {
+            "name": "Login",
+            "request": {
+                "method": "POST",
+                "header": [
+                    {
+                        "key": "Content-Type",
+                        "value": "application/json"
+                    }
+                ],
+                "body": {
+                    "mode": "raw",
+                    "raw": "{\n    \"username\": \"testuser\",\n    \"password\": \"testpassword\"\n}"
+                },
+                "url": {
+                    "raw": "{{base_url}}/login/",
+                    "host": [
+                        "{{base_url}}"
+                    ],
+                    "path": [
+                        "login",
+                        ""
+                    ]
+                },
+                "description": "Login to retrieve JWT token"
+            },
+            "response": [],
+            "event": [
+                {
+                    "listen": "test",
+                    "script": {
+                        "exec": [
+                            "var jsonData = pm.response.json();",
+                            "if (jsonData.access) {",
+                            "    pm.environment.set('token', jsonData.access);",
+                            "}"
+                        ],
+                        "type": "text/javascript"
+                    }
+                }
+            ]
+        },
+        {
+            "name": "Create Conversation",
+            "request": {
+                "method": "POST",
+                "header": [
+                    {
+                        "key": "Authorization",
+                        "value": "Bearer {{token}}"
+                    },
+                    {
+                        "key": "Content-Type",
+                        "value": "application/json"
+                    }
+                ],
+                "body": {
+                    "mode": "raw",
+                    "raw": "{\n    \"title\": \"Test Conversation\"\n}"
+                },
+                "url": {
+                    "raw": "{{base_url}}/conversations/",
+                    "host": [
+                        "{{base_url}}"
+                    ],
+                    "path": [
+                        "conversations",
+                        ""
+                    ]
+                }
+            },
+            "response": []
+        },
+        {
+            "name": "List Conversations",
+            "request": {
+                "method": "GET",
+                "header": [
+                    {
+                        "key": "Authorization",
+                        "value": "Bearer {{token}}"
+                    }
+                ],
+                "url": {
+                    "raw": "{{base_url}}/conversations/",
+                    "host": [
+                        "{{base_url}}"
+                    ],
+                    "path": [
+                        "conversations",
+                        ""
+                    ]
+                }
+            },
+            "response": []
+        },
+        {
+            "name": "Send Message",
+            "request": {
+                "method": "POST",
+                "header": [
+                    {
+                        "key": "Authorization",
+                        "value": "Bearer {{token}}"
+                    },
+                    {
+                        "key": "Content-Type",
+                        "value": "application/json"
+                    }
+                ],
+                "body": {
+                    "mode": "raw",
+                    "raw": "{\n    \"content\": \"Hello, this is a message!\"\n}"
+                },
+                "url": {
+                    "raw": "{{base_url}}/conversations/{{conversation_id}}/messages/",
+                    "host": [
+                        "{{base_url}}"
+                    ],
+                    "path": [
+                        "conversations",
+                        "{{conversation_id}}",
+                        "messages",
+                        ""
+                    ]
+                }
+            },
+            "response": []
+        },
+        {
+            "name": "List Messages in Conversation",
+            "request": {
+                "method": "GET",
+                "header": [
+                    {
+                        "key": "Authorization",
+                        "value": "Bearer {{token}}"
+                    }
+                ],
+                "url": {
+                    "raw": "{{base_url}}/conversations/{{conversation_id}}/messages/",
+                    "host": [
+                        "{{base_url}}"
+                    ],
+                    "path": [
+                        "conversations",
+                        "{{conversation_id}}",
+                        "messages",
+                        ""
+                    ]
+                }
+            },
+            "response": []
+        },
+        {
+            "name": "Unauthorized Access Test",
+            "request": {
+                "method": "GET",
+                "header": [],
+                "url": {
+                    "raw": "{{base_url}}/conversations/",
+                    "host": [
+                        "{{base_url}}"
+                    ],
+                    "path": [
+                        "conversations",
+                        ""
+                    ]
+                },
+                "description": "This request should return 401 Unauthorized"
+            },
+            "response": []
+        }
+    ],
+    "variable": [
+        {
+            "key": "base_url",
+            "value": "http://127.0.0.1:8000/api"
+        },
+        {
+            "key": "token",
+            "value": ""
+        },
+        {
+            "key": "conversation_id",
+            "value": "1"
+        }
+    ]
+}
