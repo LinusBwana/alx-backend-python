@@ -6,6 +6,8 @@ from . models import CustomUser
 from rest_framework.permissions import AllowAny, IsAuthenticated
 from .permissions import IsParticipantOfConversation, CanAccessMessagesInUserConversations, CanOnlyEditOwnMessages
 from .auth import CustomJWTAuthentication
+from rest_framework import status
+from rest_framework.response import Response
 
 
 # Create your views here.
@@ -43,18 +45,32 @@ class MessageViewSet(viewsets.ModelViewSet):
         """Filter messages by conversation when accessed through nested route"""
         conversation_pk = self.kwargs.get('conversation_pk')
         user = self.request.user
+
         if conversation_pk:
+            # Check if user has access to this conversation
+            if not Conversation.objects.filter(pk=conversation_pk, participants_id=user).exists():
+                return Response(
+                    {"detail": "You don't have permission to access this conversation"},
+                    status=status.HTTP_403_FORBIDDEN
+                )
             return Message.objects.filter(conversation_id=conversation_pk, conversation__participants_id=user)
         return Message.objects.filter(conversation__participants_id=user)
 
     def perform_create(self, serializer):
         """Automatically set the conversation when creating a message through nested route"""
         conversation_pk = self.kwargs.get('conversation_pk')
+
         if conversation_pk:
             try:
                 conversation = Conversation.objects.get(pk=conversation_pk)
-                serializer.save(conversation=conversation)
+                # Check if user is participant of the conversation
+                if not conversation.participants_id.filter(id=self.request.user.id).exists():
+                    return Response(
+                        {"detail": "You don't have permission to post messages in this conversation"},
+                        status=status.HTTP_403_FORBIDDEN
+                    )
+                serializer.save(conversation=conversation, sender=self.request.user)
             except Conversation.DoesNotExist:
                 raise serializers.ValidationError("Conversation not found")
         else:
-            serializer.save()
+            serializer.save(sender=self.request.user)
