@@ -18,11 +18,11 @@ class IsParticipantOfConversation(BasePermission):
         
         # Everyone can view if they are the participant
         if request.method in ['GET', 'HEAD', 'OPTIONS']:
-            return obj.participants_id == request.user
+            return request.user in obj.participants_id.all()
         
         # Only the participant can modify or delete
         if request.method in ['PUT', 'PATCH', 'DELETE']:
-            return obj.participants_id == request.user
+            return request.user in obj.participants_id.all()
         
         return False
 
@@ -40,7 +40,7 @@ class CanAccessMessagesInUserConversations(BasePermission):
         # Step 2: Check if this message is in a conversation the user is part of
         # obj is the message we're trying to access
         if isinstance(obj, Message):
-            return obj.conversation.participants_id == request.user
+            return request.user in obj.conversation.participants_id.all()
         return False
 
 
@@ -57,7 +57,7 @@ class CanOnlyEditOwnMessages(BasePermission):
         
         # For viewing: check if user is in the conversation
         if request.method in ['GET', 'HEAD', 'OPTIONS']:
-            return obj.conversation.participants_id == request.user
+            return request.user in obj.conversation.participants_id.all()
         
         # For editing/deleting: must be the person who sent the message
         return obj.sender_id == request.user

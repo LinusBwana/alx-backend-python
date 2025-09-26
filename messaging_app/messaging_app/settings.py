@@ -14,9 +14,7 @@ from pathlib import Path
 import os
 import environ
 from datetime import timedelta
-
-import rest_framework
-import rest_framework.pagination
+from datetime import datetime
 
 # Build paths inside the project like this: BASE_DIR / 'subdir'.
 BASE_DIR = Path(__file__).resolve().parent.parent
@@ -118,7 +116,9 @@ AUTH_PASSWORD_VALIDATORS = [
 
 LANGUAGE_CODE = 'en-us'
 
-TIME_ZONE = 'UTC'
+TIME_ZONE = 'Africa/Nairobi'
+
+DATETIME_FORMAT = "%d %m %Y %H:%M:%S"
 
 USE_I18N = True
 
@@ -143,13 +143,15 @@ REST_FRAMEWORK = {
     ],
     'DEFAULT_PERMISSION_CLASSES': [
         'rest_framework.permissions.IsAuthenticated',
-    ]
+    ],
+    'DATETIME_FORMAT': "%d %m %Y %H:%M:%S",
+    'USE_TZ': True, 
 }
 
 AUTH_USER_MODEL = env('AUTH_USER_MODEL')
 
 SIMPLE_JWT = {
-    "ACCESS_TOKEN_LIFETIME": timedelta(minutes=5),
+    "ACCESS_TOKEN_LIFETIME": timedelta(days=1),
     "REFRESH_TOKEN_LIFETIME": timedelta(days=2),
     "ROTATE_REFRESH_TOKENS": True,
     "BLACKLIST_AFTER_ROTATION": True,

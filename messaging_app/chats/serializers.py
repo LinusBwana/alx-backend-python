@@ -8,6 +8,7 @@ import re
 class CustomUserSerializer(serializers.ModelSerializer):
     password = serializers.CharField(write_only=True, validators=[validate_password])
     confirm_password = serializers.CharField(write_only=True)
+    created_at = serializers.DateTimeField(format="%d %b %Y %H:%M:%S")
 
     class Meta:
         model = CustomUser
@@ -90,6 +91,7 @@ class LoginSerializer(serializers.Serializer):
 
 class MessageSerializer(serializers.ModelSerializer):
     sender_name = serializers.SerializerMethodField()
+    sent_at = serializers.DateTimeField(format="%d %b %Y %H:%M:%S")
 
     class Meta:
         model = Message
@@ -115,6 +117,7 @@ class MessageSerializer(serializers.ModelSerializer):
 class ConversationSerializer(serializers.ModelSerializer):
     messages = MessageSerializer(many=True, read_only=True)
     participant_name = serializers.SerializerMethodField()
+    created_at = serializers.DateTimeField(format="%d %b %Y %H:%M:%S")
 
     class Meta:
         model = Conversation
@@ -122,7 +125,7 @@ class ConversationSerializer(serializers.ModelSerializer):
 
     def get_participant_name(self, obj):
         """Return participant's full name"""
-        return f"{obj.participants_id.first_name} {obj.participants_id.last_name}"
+        return ', '.join([f"{participant.first_name} {participant.last_name}" for participant in obj.participants_id.all()])
 
     def validate_participants_id(self, participants_id):
         """Validate participant exists and is active"""

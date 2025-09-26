@@ -51,7 +51,7 @@ class Conversation(models.Model):
         editable=False,
         db_index=True
     )
-    participants_id = models.ForeignKey(CustomUser, on_delete=models.CASCADE, related_name='conversations')
+    participants_id = models.ManyToManyField(CustomUser, related_name='conversations')
     created_at = models.DateTimeField(auto_now_add=True)
 
     def __str__(self):
