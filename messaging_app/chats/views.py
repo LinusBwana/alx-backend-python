@@ -1,5 +1,5 @@
 from rest_framework import viewsets, filters, status, mixins
-from .serializers import ConversationSerializer, MessageSerializer, CustomUserSerializer
+from .serializers import ConversationSerializer, MessageSerializer, CustomUserSerializer, LoginSerializer
 from .models import Conversation, Message
 from rest_framework import serializers
 from . models import CustomUser
@@ -16,6 +16,29 @@ class RegisterViewSet(mixins.CreateModelMixin, viewsets.GenericViewSet):
     queryset = CustomUser.objects.all()
     serializer_class = CustomUserSerializer
     permission_classes = [AllowAny]
+
+
+class LoginViewSet(viewsets.ViewSet):
+    permission_classes = [AllowAny]
+
+    def create(self, request, *args, **kwargs):
+        """
+        Handle user login (POST request)
+        """
+        serializer = LoginSerializer(data=request.data)
+
+        if serializer.is_valid():
+            # Valid login, returning access and refresh tokens
+            user = serializer.validated_data['user']
+            user_data = CustomUserSerializer(user).data
+            return Response({
+                'refresh': serializer.validated_data['refresh'],
+                'access': serializer.validated_data['access'],
+                'user': user_data
+            }, status=status.HTTP_200_OK)
+
+        # If invalid login credentials
+        return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
 
 
 class ConversationViewSet(viewsets.ModelViewSet):

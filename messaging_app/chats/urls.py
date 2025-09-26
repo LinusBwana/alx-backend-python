@@ -8,6 +8,8 @@ router.register(r'conversations', views.ConversationViewSet, basename="conversat
 conversations_router = routers.NestedDefaultRouter(router, r'conversations', lookup='conversation')
 conversations_router.register(r'messages', views.MessageViewSet, basename='conversation-messages')
 
+router.register(r'login', views.LoginViewSet, basename='login')
+
 urlpatterns = [
     path('', include(router.urls)),
     path('', include(conversations_router.urls)),
