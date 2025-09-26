@@ -8,6 +8,7 @@ from .permissions import IsParticipantOfConversation, CanAccessMessagesInUserCon
 from .auth import CustomJWTAuthentication
 from rest_framework import status
 from rest_framework.response import Response
+from .pagination import CustomMessagePagination
 
 
 # Create your views here.
@@ -34,6 +35,7 @@ class MessageViewSet(viewsets.ModelViewSet):
     serializer_class = MessageSerializer
     permission_classes = [CanAccessMessagesInUserConversations, CanOnlyEditOwnMessages]
     authentication_classes = [CustomJWTAuthentication]
+    pagination_class = CustomMessagePagination
 
      # Enable filtering, searching, and ordering
     filter_backends = [filters.SearchFilter, filters.OrderingFilter]
