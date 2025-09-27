@@ -9,6 +9,7 @@ from .auth import CustomJWTAuthentication
 from rest_framework import status
 from rest_framework.response import Response
 from .pagination import CustomMessagePagination
+from rest_framework.exceptions import PermissionDenied
 
 
 # Create your views here.
@@ -78,10 +79,7 @@ class MessageViewSet(viewsets.ModelViewSet):
         if conversation_pk:
             # Check if user has access to this conversation
             if not Conversation.objects.filter(pk=conversation_pk, participants_id=user).exists():
-                return Response(
-                    {"detail": "You don't have permission to access this conversation"},
-                    status=status.HTTP_403_FORBIDDEN
-                )
+                raise PermissionDenied("You don't have permission to access this conversation")
             return Message.objects.filter(conversation_id=conversation_pk, conversation__participants_id=user)
         return Message.objects.filter(conversation__participants_id=user)
 
@@ -94,10 +92,7 @@ class MessageViewSet(viewsets.ModelViewSet):
                 conversation = Conversation.objects.get(pk=conversation_pk)
                 # Check if user is participant of the conversation
                 if not conversation.participants_id.filter(user_id=self.request.user.user_id).exists():
-                    return Response(
-                        {"detail": "You don't have permission to post messages in this conversation"},
-                        status=status.HTTP_403_FORBIDDEN
-                    )
+                    raise PermissionDenied("You don't have permission to post messages in this conversation")
                 serializer.save(conversation=conversation, sender_id=self.request.user)
             except Conversation.DoesNotExist:
                 raise serializers.ValidationError("Conversation not found")
