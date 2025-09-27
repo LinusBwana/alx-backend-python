@@ -99,6 +99,7 @@ class MessageSerializer(serializers.ModelSerializer):
 
         extra_kwargs = {
             'message_id': {'read_only': True},
+            'sender_id': {'read_only': True},
             'sent_at': {'read_only': True},
         }
 

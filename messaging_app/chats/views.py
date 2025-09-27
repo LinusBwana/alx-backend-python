@@ -93,13 +93,13 @@ class MessageViewSet(viewsets.ModelViewSet):
             try:
                 conversation = Conversation.objects.get(pk=conversation_pk)
                 # Check if user is participant of the conversation
-                if not conversation.participants_id.filter(id=self.request.user.id).exists():
+                if not conversation.participants_id.filter(user_id=self.request.user.user_id).exists():
                     return Response(
                         {"detail": "You don't have permission to post messages in this conversation"},
                         status=status.HTTP_403_FORBIDDEN
                     )
-                serializer.save(conversation=conversation, sender=self.request.user)
+                serializer.save(conversation=conversation, sender_id=self.request.user)
             except Conversation.DoesNotExist:
                 raise serializers.ValidationError("Conversation not found")
         else:
-            serializer.save(sender=self.request.user)
+            serializer.save(sender_id=self.request.user)
