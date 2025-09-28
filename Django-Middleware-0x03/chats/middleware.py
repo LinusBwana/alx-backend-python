@@ -139,3 +139,59 @@ class OffensiveLanguageMiddleware:
         if x_forwarded_for:
             return x_forwarded_for.split(',')[0]
         return request.META.get('REMOTE_ADDR')
+    
+
+class RolepermissionMiddleware:
+    """
+    Middleware to check if a user has the correct role
+    (admin or moderator) before allowing access to specific actions.
+    """
+
+    def __init__(self, get_response):
+        self.get_response = get_response
+        self.jwt_authenticator = JWTAuthentication()  # For JWT token decoding
+
+    def __call__(self, request):
+        # Define restricted paths or actions
+        protected_paths = [
+            "/api/admin-actions/",   # Example protected endpoint
+            "/api/messages/delete/", # Example delete endpoint
+        ]
+
+        # Apply middleware only to protected paths
+        if any(request.path.startswith(path) for path in protected_paths):
+            user = self.get_user_from_jwt(request)
+
+            # If no user or not authenticated
+            if not user:
+                return HttpResponse(
+                    "<h1>401 Unauthorized</h1>"
+                    "<p>Authentication required to access this resource.</p>",
+                    content_type="text/html",
+                    status=401
+                )
+
+            # Check user role
+            if user.role not in ["admin", "moderator"]:
+                return HttpResponse(
+                    "<h1>403 Forbidden</h1>"
+                    "<p>You do not have permission to perform this action.</p>",
+                    content_type="text/html",
+                    status=403
+                )
+
+        # Allow the request to continue
+        return self.get_response(request)
+
+    def get_user_from_jwt(self, request):
+        """
+        Extract and return the user from the JWT token in the Authorization header.
+        """
+        try:
+            auth_result = self.jwt_authenticator.authenticate(request)
+            if auth_result is not None:
+                user, _ = auth_result
+                return user
+            return None
+        except Exception:
+            return None
