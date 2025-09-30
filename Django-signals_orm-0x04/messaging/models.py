@@ -1,6 +1,7 @@
 import uuid
 from django.db import models
 from django.contrib.auth import get_user_model
+from .managers import UnreadMessagesManager
 
 User = get_user_model()
 
@@ -14,23 +15,27 @@ class Message(models.Model):
     receiver = models.ForeignKey(User, related_name='received_messages', on_delete=models.CASCADE)
     content = models.TextField()
     timestamp = models.DateTimeField(auto_now_add=True)
+
+    # Unread/read state for inbox filtering
+    read = models.BooleanField(default=False)
+
+    # Edit tracking
     edited = models.BooleanField(default=False)  # Track if the message has been edited
-    edited_by = models.ForeignKey(  # track who made the edit
-        User,
-        related_name="edited_messages",
-        null=True,
-        blank=True,
-        on_delete=models.SET_NULL
+
+    # track who made the edit
+    edited_by = models.ForeignKey(User, related_name="edited_messages",
+        null=True, blank=True, on_delete=models.SET_NULL
     )
 
     # self-referential FK for threaded replies
-    parent_message = models.ForeignKey(
-        "self",
-        null=True,
-        blank=True,
+    parent_message = models.ForeignKey("self", null=True, blank=True,
         related_name="replies",
         on_delete=models.CASCADE
     )
+
+    # Managers
+    objects = models.Manager()  # default
+    unread = UnreadMessagesManager()  # custom manager
 
     def __str__(self):
         if self.parent_message:
@@ -70,13 +75,12 @@ class MessageHistory(models.Model):
     message = models.ForeignKey(Message, related_name='history', on_delete=models.CASCADE)
     old_content = models.TextField()
     edited_at = models.DateTimeField(auto_now_add=True)
-    edited_by = models.ForeignKey(  # track who made the edit
-        User,
-        related_name="message_edits",
-        null=True,
-        blank=True,
-        on_delete=models.SET_NULL
+
+    # track who made the edit
+    edited_by = models.ForeignKey(User, related_name="message_edits",
+        null=True, blank=True, on_delete=models.SET_NULL
     )
 
     def __str__(self):
         return f"History of message {self.message.id} at {self.edited_at}"
+    
