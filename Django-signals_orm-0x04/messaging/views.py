@@ -3,9 +3,12 @@ from django.contrib.auth.decorators import login_required
 from .models import Message
 from django.contrib.auth import get_user_model
 from django.shortcuts import render, get_object_or_404
+from django.views.decorators.cache import cache_page
+from django.utils.decorators import method_decorator
 
 User = get_user_model()
 
+@cache_page(60)
 @login_required
 def delete_user(request):
     """
@@ -16,6 +19,7 @@ def delete_user(request):
     return redirect("home")  # Redirect to homepage after deletion
 
 
+@cache_page(60)
 @login_required
 def conversation_view(request, user_id):
     """
@@ -41,6 +45,7 @@ def conversation_view(request, user_id):
     })
 
 
+@cache_page(60)
 @login_required
 def inbox_view(request):
     """
