@@ -1,0 +1,54 @@
+#!/bin/bash
+
+# kurbeScript
+# This script installs Minikube, starts a Kubernetes cluster,
+# verifies that it's running, and retrieves available pods.
+
+set -e  # Exit immediately if a command exits with a non-zero status
+
+# Color codes for output
+RED='\033[0;31m'
+GREEN='\033[0;32m'
+YELLOW='\033[1;33m'
+BLUE='\033[0;34m'
+NC='\033[0m' # No Color
+
+echo -e "${BLUE}=== Step 1: Checking for Minikube installation ===${NC}"
+if ! command -v minikube &> /dev/null; then
+    echo -e "${YELLOW}Minikube not found. Installing...${NC}"
+    rm -f minikube-linux-amd64
+    curl -LO https://storage.googleapis.com/minikube/releases/latest/minikube-linux-amd64
+    sudo install minikube-linux-amd64 /usr/local/bin/minikube
+    rm -f minikube-linux-amd64
+    echo -e "${GREEN}Minikube installed successfully.${NC}"
+else
+    echo -e "${GREEN}Minikube is already installed.${NC}"
+fi
+
+echo -e "${BLUE}=== Step 2: Checking for kubectl installation ===${NC}"
+if ! command -v kubectl &> /dev/null; then
+    echo -e "${YELLOW}kubectl not found. Installing...${NC}"
+    apt-get update -y
+    apt-get install -y curl apt-transport-https
+    curl -s https://packages.cloud.google.com/apt/doc/apt-key.gpg | apt-key add -
+    echo "deb https://apt.kubernetes.io/ kubernetes-xenial main" | tee /etc/apt/sources.list.d/kubernetes.list
+    apt-get update -y
+    apt-get install -y kubectl
+    echo -e "${GREEN}kubectl installed successfully.${NC}"
+else
+    echo -e "${GREEN}kubectl is already installed.${NC}"
+fi
+
+echo -e "${BLUE}=== Step 3: Starting Minikube cluster ===${NC}"
+minikube start
+echo -e "${GREEN}Cluster started successfully.${NC}"
+
+echo -e "${BLUE}=== Step 4: Verifying cluster status ===${NC}"
+kubectl cluster-info
+echo -e "${GREEN}Cluster verification complete.${NC}"
+
+echo -e "${BLUE}=== Step 5: Checking available pods ===${NC}"
+kubectl get pods --all-namespaces
+echo -e "${GREEN}Pods retrieved successfully.${NC}"
+
+echo -e "${BLUE}=== Kubernetes setup complete ===${NC}"

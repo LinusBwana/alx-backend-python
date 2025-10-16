@@ -1,0 +1,216 @@
+# Git
+.git
+.gitignore
+.gitattributes
+
+# Version Control
+.hg
+.svn
+CVS
+
+# IDE and Editor Files
+.vscode
+.idea
+*.swp
+*.swo
+*~
+.DS_Store
+.project
+.classpath
+.c9/
+.sublime-project
+.sublime-workspace
+*.sublime-project
+*.sublime-workspace
+.atom
+.buildpath
+.cache
+.metadata
+*.iml
+*.iws
+*.ipr
+.pylintrc
+.pylintcache
+.python-version
+
+# Environment and virtual environments
+.env
+.env.local
+.env.*.local
+venv/
+env/
+ENV/
+.venv
+virtualenv/
+.python_version
+pipenv.lock
+poetry.lock
+
+# Dependency directories
+node_modules/
+npm-debug.log
+yarn-error.log
+yarn-debug.log
+bower_components/
+/vendor
+/node_modules
+/.npm
+dist/
+build/
+
+# Python
+__pycache__/
+*.py[cod]
+*$py.class
+*.egg-info/
+dist/
+build/
+eggs/
+.eggs/
+lib/
+lib64/
+parts/
+sdist/
+var/
+wheels/
+pip-wheel-metadata/
+share/python-wheels/
+*.egg-info/
+.installed.cfg
+*.egg
+MANIFEST
+.mypy_cache/
+.dmypy.json
+dmypy.json
+.pyre/
+.pytest_cache/
+coverage.xml
+*.cover
+.hypothesis/
+htmlcov/
+
+# Testing
+.tox/
+.coverage
+.coverage.*
+.cache
+nosetests.xml
+coverage.xml
+*.cover
+.hypothesis/
+.pytest_cache/
+.nox/
+
+# Documentation
+docs/_build/
+site/
+*.md
+!README.md
+README.rst
+
+# Logs
+logs/
+*.log
+npm-debug.log*
+yarn-debug.log*
+yarn-error.log*
+lerna-debug.log*
+pip-log.txt
+pip-delete-this-directory.txt
+
+# OS Files
+Thumbs.db
+.DS_Store
+.AppleDouble
+.LSOverride
+._*
+.Spotlight-V100
+.Trashes
+Desktop.ini
+
+# CI/CD
+.travis.yml
+.gitlab-ci.yml
+.github/
+.circleci/
+.drone.yml
+azure-pipelines.yml
+
+# Docker
+Dockerfile*
+docker-compose*.yml
+.dockerignore
+
+# Kubernetes
+*.yaml
+*.yml
+kube*
+k8s/
+helm/
+.helm/
+
+# Temporary and build artifacts
+tmp/
+temp/
+*.tmp
+*.bak
+*.swp
+*.swo
+minikube-linux-amd64
+minikube-darwin-amd64
+minikube-darwin-arm64
+minikube-windows-amd64.exe
+.gradle
+.gradle/
+target/
+out/
+*.jar
+*.war
+
+# Development
+.dev
+develop
+dev_notes.txt
+notes.txt
+TODO.txt
+
+# Large files and directories
+node_modules/
+.git/
+*.iso
+*.dmg
+*.tar.gz
+*.zip
+*.rar
+archives/
+backups/
+
+# Database and cache
+*.db
+*.sqlite
+*.sqlite3
+*.csv
+.cache/
+redis/
+
+# macOS
+.DS_Store
+.AppleDouble
+.LSOverride
+
+# Windows
+Thumbs.db
+ehthumbs.db
+Desktop.ini
+
+# Linux
+.directory
+
+# Miscellaneous
+.tern-port
+.env.example
+.nvmrc
+.ruby-version
+.node-version
+Makefile
+makefile
