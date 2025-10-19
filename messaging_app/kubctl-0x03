@@ -1,0 +1,23 @@
+#!/bin/bash
+set -e
+
+echo "=== Starting Rolling Update for Blue Deployment ==="
+
+# Apply the updated deployment file
+kubectl apply -f blue_deployment.yaml
+
+echo "=== Monitoring Rollout Progress ==="
+kubectl rollout status deployment/django-blue
+
+echo "=== Testing App for Downtime ==="
+# Replace the URL with your service or NodePort endpoint
+SERVICE_URL=$(minikube service django-service --url)
+echo "Pinging $SERVICE_URL continuously (Press Ctrl+C to stop)..."
+
+for i in {1..10}; do
+  curl -s -o /dev/null -w "%{http_code}\n" $SERVICE_URL
+  sleep 2
+done
+
+echo "=== Checking Updated Pods ==="
+kubectl get pods -l app=django-blue
