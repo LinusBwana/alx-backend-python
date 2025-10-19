@@ -1,0 +1,16 @@
+#!/bin/bash
+
+echo "=== Deploying Blue Version ==="
+kubectl apply -f blue_deployment.yaml
+
+echo "=== Deploying Green Version ==="
+kubectl apply -f green_deployment.yaml
+
+echo "=== Checking Deployment Status ==="
+kubectl get deployments
+
+echo "=== Checking Pods ==="
+kubectl get pods -l app=django
+
+echo "=== Checking Logs for Green Deployment ==="
+kubectl logs -l app=django,version=green --tail=50
