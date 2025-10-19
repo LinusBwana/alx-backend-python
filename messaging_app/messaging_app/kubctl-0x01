@@ -1,0 +1,41 @@
+#!/bin/bash
+# kubctl-0x01
+# This script scales the Django messaging app deployment,
+# verifies the pods, performs load testing, and monitors resource usage.
+
+set -e
+
+APP_NAME="messaging-app"  # Change this to match your deployment name
+REPLICAS=3
+
+echo "=== Scaling Deployment ==="
+kubectl scale deployment/$APP_NAME --replicas=$REPLICAS
+echo "Deployment scaled to $REPLICAS replicas."
+
+echo "=== Verifying Running Pods ==="
+kubectl get pods -l app=$APP_NAME
+
+echo "=== Performing Load Test with wrk ==="
+# Ensure wrk is installed or install it if missing
+if ! command -v wrk &> /dev/null; then
+  echo "wrk not found. Installing..."
+  sudo apt-get update -y
+  sudo apt-get install -y wrk
+fi
+
+# Get a pod name (for internal ClusterIP access, you may need a port-forward)
+POD_NAME=$(kubectl get pods -l app=$APP_NAME -o jsonpath='{.items[0].metadata.name}')
+kubectl port-forward $POD_NAME 8000:8000 &
+PF_PID=$!
+sleep 5
+
+echo "Running load test on http://localhost:8000 ..."
+wrk -t4 -c100 -d30s http://localhost:8000/
+
+kill $PF_PID
+
+echo "=== Monitoring Resource Usage ==="
+# Ensure metrics-server is installed if kubectl top fails
+kubectl top pods || echo "Metrics-server may not be installed. Install it to monitor resources."
+
+echo "=== Scaling Test Completed Successfully ==="
