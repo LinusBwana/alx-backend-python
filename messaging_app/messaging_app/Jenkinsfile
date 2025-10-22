@@ -1,11 +1,8 @@
 pipeline {
 agent any
 
-```
 environment {
-    // Replace this with your GitHub credentials ID from Jenkins
     GITHUB_CREDENTIALS = 'github-creds'
-    // Optional: Python virtual environment directory
     VENV_DIR = '.venv'
 }
 
@@ -13,7 +10,7 @@ stages {
     stage('Checkout Code') {
         steps {
             git(
-                url: 'https://github.com/your-username/alx-backend-python.git',
+                url: 'https://github.com/LinusBwana/alx-backend-python.git',
                 branch: 'main',
                 credentialsId: GITHUB_CREDENTIALS
             )
@@ -22,13 +19,12 @@ stages {
 
     stage('Set Up Python Environment') {
         steps {
-            // ShiningPanda provides the 'python' block for virtualenvs
             python {
                 sh """
                 python3 -m venv ${VENV_DIR}
                 source ${VENV_DIR}/bin/activate
                 pip install --upgrade pip
-                pip install -r messaging_app/requirements.txt
+                pip install -r messaging_app/messaging_app/requirements.txt
                 """
             }
         }
@@ -39,7 +35,7 @@ stages {
             python {
                 sh """
                 source ${VENV_DIR}/bin/activate
-                pytest messaging_app/tests/ --junitxml=report.xml
+                pytest messaging_app/messaging_app/tests/ --junitxml=report.xml
                 """
             }
         }
@@ -58,12 +54,11 @@ post {
         deleteDir()
     }
     success {
-        echo '✅ All tests passed successfully!'
+        echo 'All tests passed successfully.'
     }
     failure {
-        echo '❌ Some tests failed. Please check the report.'
+        echo 'Some tests failed. Please check the report.'
     }
 }
-```
 
 }
