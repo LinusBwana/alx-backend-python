@@ -10,23 +10,27 @@ pipeline {
 
         stage('Set Up Python Environment') {
             steps {
-                withPythonEnv('Python 3') {
-                    sh 'pip install -r messaging_app/requirements.txt'
-                }
+                sh '''
+                    python3 -m venv venv
+                    . venv/bin/activate
+                    pip install --upgrade pip
+                    pip install -r messaging_app/requirements.txt
+                '''
             }
         }
 
         stage('Run Tests') {
             steps {
-                withPythonEnv('Python 3') {
-                    sh 'pytest --junitxml=report.xml'
-                }
+                sh '''
+                    . venv/bin/activate
+                    pytest --maxfail=1 --disable-warnings -q --junitxml=test-results.xml
+                '''
             }
         }
 
         stage('Publish Test Report') {
             steps {
-                junit 'report.xml'
+                junit 'test-results.xml'
             }
         }
     }
