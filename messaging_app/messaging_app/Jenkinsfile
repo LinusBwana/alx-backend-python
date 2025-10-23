@@ -1,10 +1,17 @@
 pipeline {
     agent any
 
+    environment {
+        DOCKERHUB_CREDENTIALS = 'dockerhub-credentials'
+        DOCKER_IMAGE = 'linusbwana/jenkins-messaging-app'
+    }
+
     stages {
         stage('Checkout Code') {
             steps {
-                git branch: 'main', credentialsId: 'github-credentials', url: 'https://github.com/LinusBwana/alx-backend-python.git'
+                git branch: 'main',
+                    credentialsId: 'github-credentials',
+                    url: 'https://github.com/LinusBwana/alx-backend-python.git'
             }
         }
 
@@ -33,6 +40,25 @@ pipeline {
                 junit 'test-results.xml'
             }
         }
+
+        stage('Build Docker Image') {
+            steps {
+                sh '''
+                    docker build -t $DOCKER_IMAGE:latest -f messaging_app/Dockerfile .
+                '''
+            }
+        }
+
+        stage('Push to Docker Hub') {
+            steps {
+                withCredentials([usernamePassword(credentialsId: "${DOCKERHUB_CREDENTIALS}", usernameVariable: 'DOCKER_USER', passwordVariable: 'DOCKER_PASS')]) {
+                    sh '''
+                        echo "$DOCKER_PASS" | docker login -u "$DOCKER_USER" --password-stdin
+                        docker push $DOCKER_IMAGE:latest
+                    '''
+                }
+            }
+        }
     }
 
     post {
@@ -42,3 +68,4 @@ pipeline {
         }
     }
 }
+
