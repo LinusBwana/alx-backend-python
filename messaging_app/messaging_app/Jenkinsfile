@@ -1,43 +1,82 @@
 pipeline {
     agent any
 
+    environment {
+        DOCKERHUB_CREDENTIALS = credentials('dockerhub-credentials') // Jenkins credentials for Docker Hub
+        IMAGE_NAME = 'linusbwana/jenkins-messaging-app' // Docker Hub repo name
+    }
+
     stages {
         stage('Checkout Code') {
             steps {
+                // Clone the full repository so all paths are available
                 git branch: 'main', credentialsId: 'github-credentials', url: 'https://github.com/LinusBwana/alx-backend-python.git'
             }
         }
 
         stage('Set Up Python Environment') {
             steps {
-                sh '''
-                    python3 -m venv venv
-                    . venv/bin/activate
-                    pip3 install --upgrade pip
-                    pip3 install -r messaging_app/requirements.txt
-                '''
+                dir('messaging_app/messaging_app') {
+                    sh '''
+                        python3 -m venv venv
+                        . venv/bin/activate
+                        pip install --upgrade pip
+                        pip install -r requirements.txt
+                    '''
+                }
             }
         }
 
         stage('Run Tests') {
             steps {
-                sh '''
-                    . venv/bin/activate
-                    pytest --maxfail=1 --disable-warnings -q --junitxml=test-results.xml
-                '''
+                dir('messaging_app/messaging_app') {
+                    sh '''
+                        . venv/bin/activate
+                        pytest --maxfail=1 --disable-warnings -q --junitxml=test-results.xml
+                    '''
+                }
             }
         }
 
         stage('Publish Test Report') {
             steps {
-                junit 'test-results.xml'
+                dir('messaging_app/messaging_app') {
+                    junit 'test-results.xml'
+                }
+            }
+        }
+
+        stage('Build Docker Image') {
+            steps {
+                dir('messaging_app/messaging_app') {
+                    script {
+                        sh """
+                            docker build -t ${IMAGE_NAME}:${BUILD_NUMBER} .
+                        """
+                    }
+                }
+            }
+        }
+
+        stage('Push Docker Image') {
+            steps {
+                dir('messaging_app/messaging_app') {
+                    script {
+                        sh """
+                            echo "${DOCKERHUB_CREDENTIALS_PSW}" | docker login -u "${DOCKERHUB_CREDENTIALS_USR}" --password-stdin
+                            docker push ${IMAGE_NAME}:${BUILD_NUMBER}
+                            docker tag ${IMAGE_NAME}:${BUILD_NUMBER} ${IMAGE_NAME}:latest
+                            docker push ${IMAGE_NAME}:latest
+                        """
+                    }
+                }
             }
         }
     }
 
     post {
         always {
-            echo 'Cleaning up...'
+            echo 'Cleaning up workspace...'
             deleteDir()
         }
     }
