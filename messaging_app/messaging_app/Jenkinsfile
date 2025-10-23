@@ -1,37 +1,44 @@
 pipeline {
     agent any
-    environment {
-        DOCKERHUB_CREDENTIALS = 'dockerhub-credentials'
-        DOCKER_IMAGE = 'linusbwana/jenkins-messaging-app'
-    }
+
     stages {
-        stage('Clean Workspace') {
-            steps {
-                cleanWs()  // Clean workspace before checkout
-            }
-        }
         stage('Checkout Code') {
             steps {
-                git branch: 'main',
-                    credentialsId: 'github-credentials',
-                    url: 'https://github.com/LinusBwana/alx-backend-python.git'
+                git branch: 'main', credentialsId: 'github-credentials', url: 'https://github.com/LinusBwana/alx-backend-python.git'
             }
         }
+
         stage('Set Up Python Environment') {
             steps {
                 sh '''
                     python3 -m venv venv
                     . venv/bin/activate
-                    pip install --upgrade pip
-                    pip install -r messaging_app/requirements.txt
+                    pip3 install --upgrade pip
+                    pip3 install -r messaging_app/requirements.txt
                 '''
             }
         }
+
         stage('Run Tests') {
             steps {
-                // Your test steps here
+                sh '''
+                    . venv/bin/activate
+                    pytest --maxfail=1 --disable-warnings -q --junitxml=test-results.xml
+                '''
             }
         }
-        // ... rest of your stages
+
+        stage('Publish Test Report') {
+            steps {
+                junit 'test-results.xml'
+            }
+        }
+    }
+
+    post {
+        always {
+            echo 'Cleaning up...'
+            deleteDir()
+        }
     }
 }
