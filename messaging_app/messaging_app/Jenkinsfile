@@ -20,8 +20,8 @@ pipeline {
                 sh '''
                     python3 -m venv venv
                     . venv/bin/activate
-                    pip3 install --upgrade pip
-                    pip3 install -r messaging_app/requirements.txt
+                    pip install --upgrade pip
+                    pip install -r messaging_app/requirements.txt
                 '''
             }
         }
@@ -43,7 +43,9 @@ pipeline {
 
         stage('Build Docker Image') {
             steps {
+                // Run Docker commands as root so socket permissions are OK
                 sh '''
+                    docker --version
                     docker build -t $DOCKER_IMAGE:latest -f messaging_app/Dockerfile .
                 '''
             }
@@ -51,7 +53,9 @@ pipeline {
 
         stage('Push to Docker Hub') {
             steps {
-                withCredentials([usernamePassword(credentialsId: "${DOCKERHUB_CREDENTIALS}", usernameVariable: 'DOCKER_USER', passwordVariable: 'DOCKER_PASS')]) {
+                withCredentials([usernamePassword(credentialsId: "${DOCKERHUB_CREDENTIALS}",
+                                                 usernameVariable: 'DOCKER_USER',
+                                                 passwordVariable: 'DOCKER_PASS')]) {
                     sh '''
                         echo "$DOCKER_PASS" | docker login -u "$DOCKER_USER" --password-stdin
                         docker push $DOCKER_IMAGE:latest
@@ -68,4 +72,3 @@ pipeline {
         }
     }
 }
-
