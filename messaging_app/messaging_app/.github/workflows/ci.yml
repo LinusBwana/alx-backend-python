@@ -41,6 +41,7 @@ jobs:
         run: |
           python -m pip install --upgrade pip
           pip install -r messaging_app/requirements.txt
+          pip install flake8 coverage
 
       - name: Wait for PostgreSQL to be ready
         run: |
@@ -50,12 +51,26 @@ jobs:
             sleep 2
           done
 
+      - name: Run flake8 linting
+        run: |
+          echo "Running flake8 lint checks..."
+          flake8 messaging_app --count --select=E9,F63,F7,F82 --show-source --statistics
+          flake8 messaging_app --count --exit-zero --max-complexity=10 --max-line-length=120 --statistics
+
       - name: Run Django migrations
         run: |
           cd messaging_app
           python manage.py migrate
 
-      - name: Run tests
+      - name: Run tests with coverage
         run: |
           cd messaging_app
-          python manage.py test
+          coverage run manage.py test
+          coverage xml
+          coverage report
+
+      - name: Upload coverage report
+        uses: actions/upload-artifact@v4
+        with:
+          name: coverage-report
+          path: messaging_app/coverage.xml
